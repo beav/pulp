@@ -78,14 +78,14 @@ class PublishStepTests(PublisherBase):
 
     def test_get_repo_from_parent(self):
         step = PublishStep('foo_step')
-        step.publish_conduit = 'foo'
+        step.conduit = 'foo'
         step.parent = mock.Mock()
         step.parent.get_repo.return_value = 'foo'
         self.assertEquals('foo', step.get_repo())
 
     def test_get_distributor_type(self):
         step = PublishStep('foo_step')
-        step.distributor_type = 'foo'
+        step.plugin_type = 'foo'
         self.assertEquals('foo', step.get_distributor_type())
 
     def test_get_distributor_type_none(self):
@@ -94,19 +94,20 @@ class PublishStepTests(PublisherBase):
 
     def test_get_distributor_type_from_parent(self):
         step = PublishStep('foo_step')
-        step.publish_conduit = 'foo'
+        step.conduit = 'foo'
         step.parent = mock.Mock()
-        step.parent.get_distributor_type.return_value = 'foo'
+        # we convert this to get_plugin_type internally
+        step.parent.get_plugin_type.return_value = 'foo'
         self.assertEquals('foo', step.get_distributor_type())
 
     def test_get_conduit(self):
         step = PublishStep('foo_step')
-        step.publish_conduit = 'foo'
+        step.conduit = 'foo'
         self.assertEquals('foo', step.get_conduit())
 
     def test_get_conduit_from_parent(self):
         step = PublishStep('foo_step')
-        step.publish_conduit = 'foo'
+        step.conduit = 'foo'
         step.parent = mock.Mock()
         step.parent.get_conduit.return_value = 'foo'
         self.assertEquals('foo', step.get_conduit())
@@ -442,7 +443,7 @@ class UnitPublishStepTests(PublisherBase):
         mock_get_units.return_value = []
         step = UnitPublishStep('foo_step', 'FOO_TYPE')
         step.parent = self.publisher
-        step.process_unit = mock_method
+        step.process_item = mock_method
         step.process()
         self.assertEquals(step.state, reporting_constants.STATE_COMPLETE)
         self.assertFalse(mock_method.called)
@@ -455,7 +456,7 @@ class UnitPublishStepTests(PublisherBase):
         mock_get_units.return_value = ['mock_unit']
         step = UnitPublishStep('foo_step', 'FOO_TYPE')
         step.parent = self.publisher
-        step.process_unit = mock_method
+        step.process_item = mock_method
         step.process()
 
         self.assertEquals(step.state, reporting_constants.STATE_COMPLETE)
@@ -472,7 +473,7 @@ class UnitPublishStepTests(PublisherBase):
         mock_get_units.return_value = ['mock_unit']
         step = UnitPublishStep('foo_step', 'FOO_TYPE')
         step.parent = self.publisher
-        step.process_unit = mock_method
+        step.process_item = mock_method
 
         self.assertRaises(Exception, step.process)
         self.assertEquals(step.state, reporting_constants.STATE_FAILED)
@@ -489,7 +490,7 @@ class UnitPublishStepTests(PublisherBase):
         step = UnitPublishStep('foo_step', 'FOO_TYPE')
         self.publisher.add_child(step)
 
-        step.process_unit = self._step_canceler
+        step.process_item = self._step_canceler
         step.process()
 
         self.assertEquals(step.state, reporting_constants.STATE_CANCELLED)
@@ -545,10 +546,10 @@ class UnitPublishStepTests(PublisherBase):
         self.assertEquals(0, total)
 
 
-    def test_process_unit_with_no_work(self):
+    def test_process_item_with_no_work(self):
         # Run the blank process unit to ensure no exceptions are raised
         step = UnitPublishStep("foo", ['bar', 'baz'])
-        step.process_unit('foo')
+        step.process_item('foo')
 
 
 class TestAtomicDirectoryPublishStep(unittest.TestCase):
