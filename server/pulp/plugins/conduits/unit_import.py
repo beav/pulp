@@ -87,29 +87,6 @@ class ImportUnitConduit(ImporterScratchPadMixin, RepoScratchPadMixin,
 
     # -- public ---------------------------------------------------------------
 
-    def associate_unit(self, unit):
-        """
-        Associates the given unit with the destination repository for the import.
-
-        This call is idempotent. If the association already exists, this call
-        will have no effect.
-
-        :param unit: unit object returned from the init_unit call
-        :type  unit: pulp.plugins.model.Unit
-
-        :return: object reference to the provided unit
-        :rtype:  pulp.plugins.model.Unit
-        """
-
-        try:
-            self.__association_manager.associate_unit_by_id(self.dest_repo_id, unit.type_id, unit.id,
-                                                            self.association_owner_type,
-                                                            self.association_owner_id)
-            return unit
-        except Exception, e:
-            _LOG.exception(_('Content unit association failed [%s]' % str(unit)))
-            raise ImporterConduitException(e), None, sys.exc_info()[2]
-
     def get_source_units(self, criteria=None):
         """
         Returns the collection of content units associated with the source

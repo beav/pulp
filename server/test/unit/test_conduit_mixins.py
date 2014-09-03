@@ -475,6 +475,29 @@ class AddUnitMixinTests(unittest.TestCase):
         self.assertEqual(saved.id, 'new-unit-id')
 
     @mock.patch('pulp.server.managers.content.query.ContentQueryManager.request_content_unit_file_path')
+    @mock.patch('pulp.server.managers.repo.unit_association.RepoUnitAssociationManager.associate_unit_by_id')
+    def test_associate_unit(self, mock_associate, mock_path):
+        # Setup
+        unit = self.mixin.init_unit('t', {'k' : 'v'}, {'m' : 'm1'}, '/bar')
+
+        # Test
+        updated = self.mixin.associate_unit(unit)
+
+        # Verify
+        self.assertEqual(1, mock_associate.call_count)
+        self.assertEqual(updated, unit)
+
+    @mock.patch('pulp.server.managers.content.query.ContentQueryManager.request_content_unit_file_path')
+    @mock.patch('pulp.server.managers.repo.unit_association.RepoUnitAssociationManager.associate_unit_by_id')
+    def test_associate_unit_error(self, mock_associate, mock_path):
+        # Setup
+        unit = self.mixin.init_unit('t', {'k' : 'v'}, {'m' : 'm1'}, '/bar')
+        mock_associate.side_effect = Exception("something bad did indeed happen")
+
+        # Test/verify
+        self.assertRaises(mixins.ImporterConduitException, self.mixin.associate_unit, unit)
+
+    @mock.patch('pulp.server.managers.content.query.ContentQueryManager.request_content_unit_file_path')
     @mock.patch('pulp.server.managers.content.query.ContentQueryManager.get_content_unit_by_keys_dict')
     @mock.patch('pulp.server.managers.content.cud.ContentManager.update_content_unit')
     @mock.patch('pulp.server.managers.content.cud.ContentManager.add_content_unit')
