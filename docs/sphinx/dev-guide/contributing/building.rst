@@ -269,6 +269,45 @@ For our 2.4 beta example, the rsync command would be:
 You can now run the automated QE suite against the testing repository to ensure that the build is
 stable and has no known issues.
 
+Signing the Build
+-----------------
+
+We do not currently sign builds (see https://bugzilla.redhat.com/show_bug.cgi?id=1128788).
+The text below is a proposal based on how the Katello team signs builds. Please
+skip this step for now if you are following through the instructions.
+
+.. TODO:
+   There are some missing steps in this doc, such as how to create and revoke the shared GPG key.
+
+GA builds are signed with the Pulp GPG key. To sign::
+
+    $ rpm --import pulp.private.asc
+    $ rpm --addsign a-pulp-build.rpm
+
+Key Management
+^^^^^^^^^^^^^^
+Most of this is similar to how the Katello team manages its signing key.
+
+We can create a shared GPG key for "Pulp Team <pulp-list@redhat.com>". The
+shared key should have some expiration date. The public key goes somewhere
+accessible to everyone, and the private key and password are saved to two
+files; let's call them `pulp.private.asc` and `pulp-passphrase.txt`. These
+files are encrypted with the personal GPG keys of team members (*NOTE*: team
+members who want to be able to sign RPMs will need to create GPG keys if they
+don't already have them). The encrypted private key and password go in a repo.
+
+To decrypt the signing key and password::
+
+    $ gpg -d pulp.private.asc.gpg > pulp.private.asc
+    $ gpg -d pulp-passphrase.txt.gpg > pulp-passphrase.txt
+
+To encrypt the signing key and password (useful when adding or removing a
+personal key)::
+
+    $ gpg -e -r <KEY ID> -r <KEY ID> ... pulp.private.asc
+    $ gpg -e -r <KEY ID> -r <KEY ID> ... pulp-passphrase.txt
+
+
 Publishing the Build
 --------------------
 
