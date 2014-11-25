@@ -84,19 +84,15 @@ def handle_worker_heartbeat(event):
     """
     Celery event handler for 'worker-heartbeat' events.
 
-    The event is first parsed and logged. If this event is from the resource manager, there is
-    no further processing to be done. Then the existing Worker objects are searched
-    for one to update. If an existing one is found, it is updated. Otherwise a new
-    Worker entry is created. Logging at the info and debug level is also done.
+    The event is first parsed and logged.  Then the existing Worker objects are
+    searched for one to update. If an existing one is found, it is updated.
+    Otherwise a new Worker entry is created. Logging at the info and debug
+    level is also done.
 
     :param event: A celery event to handle.
     :type event: dict
     """
     event_info = _parse_and_log_event(event)
-
-    # if this is the resource_manager do nothing
-    if _is_resource_manager(event):
-        return
 
     find_worker_criteria = Criteria(filters={'_id': event_info['worker_name']},
                                     fields=('_id', 'last_heartbeat'))

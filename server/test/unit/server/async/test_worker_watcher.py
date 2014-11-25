@@ -123,7 +123,7 @@ class TestHandleWorkerHeartbeat(unittest.TestCase):
                                                                  mock_list):
         mock_event = mock.Mock()
         worker_watcher.handle_worker_heartbeat(mock_event)
-        self.assertTrue(not mock_criteria.called)
+        self.assertTrue(mock_criteria.called)
 
 
 class TestHandleWorkerOffline(unittest.TestCase):

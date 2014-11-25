@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from gettext import gettext as _
 import itertools
 import logging
+import platform
 import threading
 import time
 
@@ -17,6 +18,7 @@ from pulp.server.db.model.criteria import Criteria
 from pulp.server.db.model.dispatch import ScheduledCall, ScheduleEntry
 from pulp.server.managers import resources
 from pulp.server.managers.schedule import utils
+from pulp.server.async.worker_watcher import handle_worker_heartbeat
 
 # The import below is not used in this module, but it needs to be kept here. This module is the
 # first and only Pulp module to be imported by celerybeat, and by importing pulp.server.logs, it
@@ -309,13 +311,22 @@ class Scheduler(beat.Scheduler):
         Superclass runs a tick, that is one iteration of the scheduler. Executes
         all due tasks.
 
-        This method adds a call to trim the failure watcher.
+	This method adds a call to trim the failure watcher and updates the
+	last heartbeat time of the scheduler. We do not actually send a
+	heartbeat message since it would just get read again by this class.
 
         :return:    number of seconds before the next tick should run
         :rtype:     float
         """
         ret = super(Scheduler, self).tick()
         self._failure_watcher.trim()
+
+	# this is not an event that gets sent anywhere. We process it
+	# immediately.
+        scheduler_event = {'timestamp': time.time(),
+                           'type': 'scheduler-event',
+                           'hostname': ("scheduler@%s" % platform.node())}
+        handle_worker_heartbeat(scheduler_event)
         return ret
 
     def setup_schedule(self):

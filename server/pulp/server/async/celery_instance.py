@@ -76,6 +76,10 @@ celery.conf.update(CELERY_RESULT_BACKEND='mongodb')
 celery.conf.update(CELERY_MONGODB_BACKEND_SETTINGS=create_mongo_config())
 celery.conf.update(CELERY_WORKER_DIRECT=True)
 
+# qpid transport does not support heartbeats right now, these are unused
+celery.conf.update(BROKER_HEARTBEAT=10)
+celery.conf.update(BROKER_HEARTBEAT_CHECKRATE=2.0)
+
 if config.getboolean('tasks', 'celery_require_ssl'):
     BROKER_USE_SSL = {
         'ca_certs': config.get('tasks', 'cacert'),

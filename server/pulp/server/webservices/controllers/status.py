@@ -17,6 +17,8 @@ Unauthenticated status API so that other can make sure we're up (to no good).
 
 import web
 
+import pulp.server.managers.factory as managers
+
 from pulp.server.webservices.controllers.base import JSONController
 
 # status controller ------------------------------------------------------------
@@ -24,7 +26,18 @@ from pulp.server.webservices.controllers.base import JSONController
 class StatusController(JSONController):
 
     def GET(self):
-        status_data = {'api_version': '2'}
+        status_manager = managers.status_manager()
+        topic_manager = managers.topic_publish_manager()
+
+        pulp_version = status_manager.get_version()
+        pulp_workers = [w for w in status_manager.get_workers()]
+        pulp_messaging_connection = status_manager.get_broker_conn_status()
+
+        status_data = {'api_version': '2',
+                       'pulp_version': pulp_version,
+                       'pulp_messaging_connection': pulp_messaging_connection,
+                       'workers': pulp_workers}
+
         return self.ok(status_data)
 
 # web.py application -----------------------------------------------------------

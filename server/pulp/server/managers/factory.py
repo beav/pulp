@@ -69,6 +69,7 @@ TYPE_REPO_SYNC                  = 'repo-sync-manager'
 TYPE_REPO_SYNC_SCHEDULE         = 'repo-sync-schedule-manager'
 TYPE_ROLE                       = 'role-manager'
 TYPE_ROLE_QUERY                 = 'role-query-manager'
+TYPE_STATUS                     = 'status-manager'
 TYPE_TOPIC_PUBLISH              = 'topic-publish-manager'
 TYPE_USER                       = 'user-manager'
 TYPE_USER_QUERY                 = 'user-query-manager'
@@ -368,6 +369,12 @@ def role_query_manager():
     """
     return get_manager(TYPE_ROLE_QUERY)
 
+def status_manager():
+    """
+    @rtype: L{pulp.server.managers.StatusManager}
+    """
+    return get_manager(TYPE_STATUS)
+
 def topic_publish_manager():
     """
     @rtype: L{pulp.server.managers.event.remote.TopicPublishManager}
@@ -440,6 +447,7 @@ def initialize():
     from pulp.server.managers.repo.unit_association_query import RepoUnitAssociationQueryManager
     from pulp.server.managers.schedule.repo import RepoPublishScheduleManager, RepoSyncScheduleManager
     from pulp.server.managers.schedule.consumer import ConsumerScheduleManager
+    from pulp.server.managers.status import StatusManager
 
     # Builtins for a normal running Pulp server (used to reset the state of the
     # factory between runs)
@@ -488,6 +496,7 @@ def initialize():
         TYPE_REPO_SYNC_SCHEDULE: RepoSyncScheduleManager,
         TYPE_ROLE: RoleManager,
         TYPE_ROLE_QUERY: RoleQueryManager,
+        TYPE_STATUS: StatusManager,
         TYPE_TOPIC_PUBLISH: TopicPublishManager,
         TYPE_USER: UserManager,
         TYPE_USER_QUERY: UserQueryManager,
