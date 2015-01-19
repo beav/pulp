@@ -117,6 +117,7 @@ mkdir -p %{buildroot}/%{_sysconfdir}/gofer/plugins
 mkdir -p %{buildroot}/%{_sysconfdir}/pki/%{name}
 mkdir -p %{buildroot}/%{_sysconfdir}/pki/%{name}/consumer
 mkdir -p %{buildroot}/%{_sysconfdir}/pki/%{name}/consumer/server
+mkdir -p %{buildroot}/%{_sysconfdir}/pki/%{name}/content
 mkdir -p %{buildroot}/%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}/%{_usr}/lib/%{name}/
 mkdir -p %{buildroot}/%{_usr}/lib/%{name}/consumer
@@ -272,6 +273,7 @@ Requires: python-isodate >= 0.5.0-1.pulp
 Requires: python-BeautifulSoup
 Requires: python-qpid
 Requires: python-nectar >= 1.1.6
+Requires: python-rhsm >= 1.8.0
 Requires: httpd
 Requires: mod_ssl
 Requires: openssl
@@ -305,6 +307,7 @@ Pulp provides replication, access, and accounting for software repositories.
 %config(noreplace) %{_sysconfdir}/default/pulp_workers
 %config(noreplace) %{_sysconfdir}/default/pulp_resource_manager
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/pulp/repo_auth.conf
 %dir %{_sysconfdir}/pki/%{name}
 %dir %{_sysconfdir}/%{name}/content/sources/conf.d
 %dir %{_sysconfdir}/%{name}/server
@@ -312,6 +315,7 @@ Pulp provides replication, access, and accounting for software repositories.
 %dir %{_sysconfdir}/%{name}/vhosts80
 %dir /srv/%{name}
 /srv/%{name}/webservices.wsgi
+/srv/%{name}/repo_auth.wsgi
 %{_bindir}/pulp-manage-db
 %{_bindir}/pulp-qpid-ssl-cfg
 %{_bindir}/pulp-gen-ca-certificate
@@ -341,9 +345,10 @@ Pulp provides replication, access, and accounting for software repositories.
 %config(noreplace) %{_sysconfdir}/%{name}/server.conf
 # - apache:apache
 %defattr(-,apache,apache,-)
-%{_var}/lib/%{name}/
 %dir %{_var}/log/%{name}
+%{_var}/lib/%{name}/
 %{_var}/www/pub
+%{_sysconfdir}/pki/pulp/content/
 # Install the docs
 %defattr(-,root,root,-)
 %doc README LICENSE COPYRIGHT

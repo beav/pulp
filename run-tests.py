@@ -13,6 +13,8 @@ subprocess.call(['find', PROJECT_DIR, '-name', '*.pyc', '-delete'])
 
 # These paths should all pass PEP-8 checks
 paths_to_check = [
+    'repoauth/pulp/repoauth/',
+    'repoauth/test/',
     'server/pulp/server/agent/',
     'server/pulp/server/async/',
     'server/pulp/server/auth/',
@@ -46,6 +48,7 @@ TESTS_NON_RHEL5 = [
     'client_admin/test/unit',
     'nodes/test/unit',
     'server/test/unit',
+    'repoauth/test',
     'devel/test/unit'
 ]
 
