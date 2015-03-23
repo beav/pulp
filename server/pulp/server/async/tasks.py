@@ -15,11 +15,10 @@ from pulp.common import constants, dateutils
 from pulp.server.async.celery_instance import celery, RESOURCE_MANAGER_QUEUE, \
     DEDICATED_QUEUE_EXCHANGE
 from pulp.server.exceptions import PulpException, MissingResource
-from pulp.server.db.model.criteria import Criteria
 from pulp.server.db.model.dispatch import TaskStatus
-from pulp.server.db.model.resources import ReservedResource, Worker
+from pulp.server.db.model.resources import ReservedResource
+from pulp.server.db.model.workers import Worker
 from pulp.server.exceptions import NoWorkers
-from pulp.server.managers import resources
 from pulp.server.managers.repo import _common as common_utils
 
 
@@ -55,14 +54,14 @@ def _queue_reserved_task(name, task_id, resource_id, inner_args, inner_kwargs):
     """
     while True:
         try:
-            worker = resources.get_worker_for_reservation(resource_id)
+            worker = Worker.get_worker_for_reservation(resource_id)
         except NoWorkers:
             pass
         else:
             break
 
         try:
-            worker = resources.get_unreserved_worker()
+            worker = Worker.get_unreserved_worker()
         except NoWorkers:
             pass
         else:
@@ -95,8 +94,7 @@ def _delete_worker(name, normal_shutdown=False):
 
     Any tasks associated with this worker are explicitly canceled.
 
-    :param name:            The name of the worker you wish to delete. In the database, the _id
-                            field is the name.
+    :param name:            The name of the worker you wish to delete.
     :type  name:            basestring
     :param normal_shutdown: True if the worker shutdown normally, False otherwise.  Defaults to
                             False.
@@ -108,17 +106,16 @@ def _delete_worker(name, normal_shutdown=False):
         _logger.error(msg)
 
     # Delete the worker document
-    worker_list = list(resources.filter_workers(Criteria(filters={'_id': name})))
-    if len(worker_list) > 0:
-        worker_document = worker_list[0]
-        worker_document.delete()
+    worker = Worker.objects(name=name).first()
+
+    if worker:
+        worker.delete()
 
     # Delete all reserved_resource documents for the worker
     ReservedResource.get_collection().remove({'worker_name': name})
 
     # Cancel all of the tasks that were assigned to this worker's queue
-    worker = Worker.from_bson({'_id': name})
-    for task_status in TaskStatus.objects(worker_name=worker.name,
+    for task_status in TaskStatus.objects(worker_name=name,
                                           state__in=constants.CALL_INCOMPLETE_STATES):
         cancel(task_status['task_id'])
 

@@ -1,7 +1,6 @@
 """
 Unauthenticated status API so that other can make sure we're up (to no good).
 """
-
 import web
 
 import pulp.server.managers.status as status_manager
@@ -19,7 +18,8 @@ class StatusController(JSONController):
 
         # do not ask for the worker list unless we have a DB connection
         if pulp_db_connection['connected']:
-            pulp_workers = [w for w in status_manager.get_workers()]
+            # convert Worker documents to dicts
+            pulp_workers = [w.to_mongo().to_dict() for w in status_manager.get_workers()]
         else:
             pulp_workers = []
 

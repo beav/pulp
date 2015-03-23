@@ -1,6 +1,6 @@
 from base import PulpWebserviceTests
 
-from mock import Mock, patch
+from mock import MagicMock, Mock, patch
 
 
 class StatusControllerTests(PulpWebserviceTests):
@@ -18,7 +18,8 @@ class StatusControllerTests(PulpWebserviceTests):
         mock_status_manager.get_version.return_value = {"platform_version": "1.2.3"}
         mock_status_manager.get_broker_conn_status.return_value = {'connected': True}
         mock_status_manager.get_mongo_conn_status.return_value = {'connected': True}
-        mock_status_manager.get_workers.return_value = [
+        mock_workers = MagicMock()
+        mock_workers.to_mongo.to_dict.return_value = [
             {
                 "last_heartbeat": "2014-12-08T15:52:29Z",
                 "name": "reserved_resource_worker-0@fake.hostname"
@@ -27,6 +28,8 @@ class StatusControllerTests(PulpWebserviceTests):
                 "last_heartbeat": "2014-12-08T15:52:29Z",
                 "name": "resource_manager@fake.hostname"
             }]
+
+        mock_status_manager.get_workers.return_value = mock_workers
 
         status, body = self.get('/v2/status/')
 

@@ -7,6 +7,7 @@ import uuid
 
 from ....base import ResourceReservationTests
 from pulp.server.db.model import resources
+from pulp.server.db.model.workers import Worker
 
 
 class TestWorker(ResourceReservationTests):
@@ -53,13 +54,14 @@ class TestWorker(ResourceReservationTests):
         Test delete().
         """
         now = datetime.utcnow()
-        worker = resources.Worker('wont_exist_for_long', now)
+        worker = Worker('wont_exist_for_long', now)
         worker.save()
-        workers_collection = resources.Worker.get_collection()
-        self.assertEqual(workers_collection.find({'_id': 'wont_exist_for_long'}).count(), 1)
+        workers_collection = Worker.objects()
+        self.assertEqual(workers_collection.get(name='wont_exist_for_long'), worker)
 
         worker.delete()
 
+        workers_collection = Worker.objects()
         self.assertEqual(workers_collection.count(), 0)
 
     def test_from_bson(self):
@@ -84,14 +86,14 @@ class TestWorker(ResourceReservationTests):
         """
         last_heartbeat = datetime(2013, 12, 16)
 
-        worker = resources.Worker('a_worker', last_heartbeat)
+        worker = Worker('a_worker', last_heartbeat)
 
         worker.save()
 
         # Make sure the DB has the correct data
-        workers_collection = resources.Worker.get_collection()
+        workers_collection = Worker.objects()
         self.assertEqual(workers_collection.count(), 1)
-        saved_worker = workers_collection.find_one({'_id': 'a_worker'})
+        saved_worker = workers_collection.get(name='a_worker')
         self.assertEqual(saved_worker['last_heartbeat'], last_heartbeat)
 
 

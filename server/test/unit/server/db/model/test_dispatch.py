@@ -1129,7 +1129,8 @@ class TaskStatusTests(base.PulpServerTests):
             set__progress_report=delta['progress_report'])
 
         # ensure event was fired for update_one()
-        mock_send.assert_called_once_with(ts, routing_key="tasks.%s" % task_id)
+        self.assertEquals(len(mock_send.call_args_list), 2)
+        mock_send.assert_called_with(ts, routing_key="tasks.%s" % task_id)
 
     @mock.patch('pulp.server.db.model.base.CriteriaQuerySet.find_by_criteria')
     def test_find_by_criteria(self, mock_find_by_criteria):
